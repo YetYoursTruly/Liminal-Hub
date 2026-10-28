@@ -10,7 +10,7 @@
 		sec:Slider(text, min, max, default, fn, "%") / sec:Keybind(text, "RightShift", fn)
 		local box = sec:Container(height) -- raw Frame for custom layouts
 
-	Custom Watch Dogs background:
+	Custom Monochrome background:
 		Put Background.png (or .jpg) in Workspace/LiminalHub/
 ]]
 
@@ -43,7 +43,7 @@ if getgenv().LiminalHub and getgenv().LiminalHub.Destroy then
 end
 
 --// Constants
-local VERSION = "1.1.0"
+local VERSION = "1.2.0"
 local REPO_URL = "https://github.com/YetYoursTruly/Liminal-Hub"
 local RAW = "https://raw.githubusercontent.com/YetYoursTruly/Liminal-Hub/main/"
 local ROOT = "LiminalHub"
@@ -57,8 +57,11 @@ local PATHS = {
 local BG_FILES = { "Background.png", "Background.jpg", "Background.jpeg" }
 local ICONS = {
 	"settings", "palette", "music", "play", "pause", "repeat", "volume-2",
-	"volume-x", "sliders-horizontal", "house", "x", "minus", "info",
+	"volume-x", "sliders-horizontal", "house", "x", "minus", "maximize", "info",
 }
+local SIZE_NORMAL = Vector2.new(640, 420)
+local SIZE_MAX = Vector2.new(880, 560)
+local SHADOW_T = 0.5
 
 --// Folders + icon download
 for _, folder in ipairs({ PATHS.Root, PATHS.Assets, PATHS.Music }) do
@@ -108,15 +111,15 @@ local function Icon(name)
 	return ""
 end
 
---// Config (theme is intentionally not saved: the hub always starts on Watch Dogs)
+--// Config (theme is intentionally not saved: the hub always starts on Monochrome)
 local Config = {
 	Volume = 50,
 	Muted = false,
 	Autoplay = false,
 	Scale = 100,
 	ToggleKey = "RightShift",
-	BgDim = 55,
-	Theme = "Watch Dogs",
+	BgDim = 40,
+	Theme = "Monochrome",
 }
 if isfile(PATHS.Config) then
 	local ok, data = pcall(function()
@@ -144,31 +147,31 @@ local function Save()
 end
 
 --// Themes
-local ThemeOrder = { "Watch Dogs", "Matrix", "Late Night Tokyo", "Halloween" }
+local ThemeOrder = { "Monochrome", "Matrix", "Late Night Tokyo", "Halloween" }
 local Themes = {
-	["Watch Dogs"] = {
-		Background = Color3.fromRGB(6, 6, 6), Surface = Color3.fromRGB(12, 12, 12), Surface2 = Color3.fromRGB(22, 22, 22),
+	["Monochrome"] = {
+		Background = Color3.fromRGB(6, 6, 6), Surface = Color3.fromRGB(13, 13, 13), Surface2 = Color3.fromRGB(24, 24, 24),
 		Accent = Color3.fromRGB(255, 255, 255), Accent2 = Color3.fromRGB(120, 120, 120),
-		Text = Color3.fromRGB(240, 240, 240), SubText = Color3.fromRGB(128, 128, 128), Stroke = Color3.fromRGB(52, 52, 52),
+		Text = Color3.fromRGB(242, 242, 242), SubText = Color3.fromRGB(168, 168, 168), Stroke = Color3.fromRGB(62, 62, 62),
 		OnAccent = Color3.fromRGB(0, 0, 0), Font = Enum.Font.GothamMedium, FontBold = Enum.Font.GothamBold,
 		UseImage = true,
 	},
 	["Matrix"] = {
 		Background = Color3.fromRGB(0, 5, 0), Surface = Color3.fromRGB(2, 14, 4), Surface2 = Color3.fromRGB(5, 28, 9),
 		Accent = Color3.fromRGB(0, 255, 65), Accent2 = Color3.fromRGB(0, 150, 25),
-		Text = Color3.fromRGB(185, 255, 200), SubText = Color3.fromRGB(55, 160, 80), Stroke = Color3.fromRGB(0, 75, 22),
+		Text = Color3.fromRGB(185, 255, 200), SubText = Color3.fromRGB(80, 190, 105), Stroke = Color3.fromRGB(0, 80, 24),
 		OnAccent = Color3.fromRGB(0, 12, 2), Font = Enum.Font.Code, FontBold = Enum.Font.Code,
 	},
 	["Late Night Tokyo"] = {
 		Background = Color3.fromRGB(6, 9, 24), Surface = Color3.fromRGB(12, 17, 40), Surface2 = Color3.fromRGB(21, 28, 62),
 		Accent = Color3.fromRGB(88, 140, 255), Accent2 = Color3.fromRGB(255, 92, 170),
-		Text = Color3.fromRGB(220, 227, 255), SubText = Color3.fromRGB(118, 132, 184), Stroke = Color3.fromRGB(36, 46, 96),
+		Text = Color3.fromRGB(224, 230, 255), SubText = Color3.fromRGB(150, 164, 214), Stroke = Color3.fromRGB(40, 52, 106),
 		OnAccent = Color3.fromRGB(255, 255, 255), Font = Enum.Font.GothamMedium, FontBold = Enum.Font.GothamBold,
 	},
 	["Halloween"] = {
 		Background = Color3.fromRGB(9, 5, 13), Surface = Color3.fromRGB(19, 11, 28), Surface2 = Color3.fromRGB(32, 19, 46),
 		Accent = Color3.fromRGB(255, 117, 0), Accent2 = Color3.fromRGB(150, 70, 235),
-		Text = Color3.fromRGB(247, 232, 216), SubText = Color3.fromRGB(165, 132, 155), Stroke = Color3.fromRGB(72, 40, 94),
+		Text = Color3.fromRGB(247, 232, 216), SubText = Color3.fromRGB(190, 160, 180), Stroke = Color3.fromRGB(78, 44, 102),
 		OnAccent = Color3.fromRGB(16, 8, 4), Font = Enum.Font.GothamMedium, FontBold = Enum.Font.GothamBold,
 	},
 }
@@ -227,6 +230,10 @@ local function RefreshAll(instant)
 	end
 end
 
+local function Corner(parent, r)
+	return New("UICorner", { CornerRadius = UDim.new(0, r) }, parent)
+end
+
 local function Stroke(parent, key, transparency)
 	local s = New("UIStroke", {
 		Thickness = 1, Transparency = transparency or 0, ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
@@ -261,68 +268,103 @@ local function Img(parent, name, size, pos, color)
 	return Bind(i, { ImageColor3 = color or "Accent" })
 end
 
+--// Background state + panel opacity (panels get more see-through only when a custom image is showing)
+local BgState = { Found = false }
+local Panels = {}
+local BgDim, BgImage, BgStatus
+
+local function PanelTransparency()
+	return (Theme.UseImage and BgState.Found) and 0.3 or 0.04
+end
+
+local function Panel(inst)
+	inst.BackgroundTransparency = PanelTransparency()
+	table.insert(Panels, inst)
+	return inst
+end
+
+local function UpdateBackground(instant)
+	local show = (Theme.UseImage and BgState.Found) and true or false
+	if BgImage then
+		BgImage.Visible = show
+		BgDim.Visible = show
+		BgDim.BackgroundTransparency = 1 - (Config.BgDim / 100)
+	end
+	for i = #Panels, 1, -1 do
+		local p = Panels[i]
+		if p.Parent == nil then
+			table.remove(Panels, i)
+		else
+			Set(p, { BackgroundTransparency = PanelTransparency() }, instant)
+		end
+	end
+	if BgStatus then
+		if not Theme.UseImage then
+			BgStatus.Text = "Background images only show on the Monochrome theme."
+		elseif BgState.Found then
+			BgStatus.Text = "Background loaded. Higher darkness = darker image, 0% = raw image."
+		else
+			BgStatus.Text = "No background found. Put Background.png or Background.jpg in Workspace/LiminalHub/ then press Reload."
+		end
+	end
+end
+
 --// ScreenGui + window
 local Gui = New("ScreenGui", {
 	Name = "LiminalHub", ResetOnSpawn = false, IgnoreGuiInset = true,
-	ZIndexBehavior = Enum.ZIndexBehavior.Sibling, DisplayOrder = 999,
+	ZIndexBehavior = Enum.ZIndexBehavior.Sibling, DisplayOrder = 999, Enabled = false,
 }, (gethui and gethui()) or CoreGui)
 
 local Window = New("Frame", {
 	Name = "Window", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5),
-	Size = UDim2.fromOffset(640, 420), BackgroundTransparency = 1,
+	Size = UDim2.fromOffset(SIZE_NORMAL.X, SIZE_NORMAL.Y), BackgroundTransparency = 1,
 }, Gui)
 local UIScaleObj = New("UIScale", { Scale = Config.Scale / 100 }, Window)
 
-local State = { Minimized = false, Listening = false, Open = true }
+-- Anim holds everything so open/close can slide it without touching the draggable Window
+local Anim = New("Frame", { Name = "Anim", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1) }, Window)
 
--- Glow halos: stacked outer strokes that fade out, drawn behind the window
-local Halos = {}
+local State = { Listening = false, Open = false, Maximized = false, Unloading = false, Token = 0 }
+
+-- Shadow (Roblox UIShadow) sits on a solid backing box behind the window
+local ShadowBox = New("Frame", {
+	Name = "ShadowBox", Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(0, 0, 0),
+	BackgroundTransparency = 0, BorderSizePixel = 0, ZIndex = 0,
+}, Anim)
+Corner(ShadowBox, 8)
+
+local Shadow
 do
-	local bases = { 0.55, 0.74, 0.87, 0.95 }
-	for i, base in ipairs(bases) do
-		local h = New("Frame", {
-			Name = "Halo" .. i, BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 0,
-			Position = UDim2.fromOffset(-i * 2, -i * 2), Size = UDim2.new(1, i * 4, 1, i * 4),
-		}, Window)
-		local s = New("UIStroke", { Thickness = 2, Transparency = base, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }, h)
+	local ok, s = pcall(Instance.new, "UIShadow")
+	if ok and s then
+		pcall(function() s.BlurRadius = UDim.new(0, 32) end)
+		pcall(function() s.Spread = UDim2.fromOffset(2, 2) end)
+		pcall(function() s.Offset = UDim2.new() end)
+		pcall(function() s.Transparency = SHADOW_T end)
+		s.Parent = ShadowBox
 		Bind(s, { Color = "Accent" })
-		Halos[i] = { s = s, base = base }
+		Shadow = s
+	else
+		warn("[Liminal Hub] UIShadow is not supported here, skipping the glow shadow.")
 	end
 end
 
-Connect(RunService.Heartbeat, function()
-	if not Gui.Enabled then
-		return
-	end
-	local pulse = math.sin(os.clock() * 1.6) * 0.05
-	for _, h in ipairs(Halos) do
-		h.s.Transparency = math.clamp(h.base + pulse, 0, 1)
-	end
-end)
-
-local Main = New("Frame", {
-	Name = "Main", Size = UDim2.fromScale(1, 1), BorderSizePixel = 0, ClipsDescendants = true, ZIndex = 1,
-}, Window)
+local Main = New("CanvasGroup", {
+	Name = "Main", Size = UDim2.fromScale(1, 1), BorderSizePixel = 0, ZIndex = 1, GroupTransparency = 1,
+}, Anim)
 Bind(Main, { BackgroundColor3 = "Background" })
-Stroke(Main, "Accent", 0.35)
+Corner(Main, 8)
+Stroke(Main, "Accent", 0.65)
 
---// Background image (Watch Dogs theme)
-local BgImage = New("ImageLabel", {
+--// Background image
+BgImage = New("ImageLabel", {
 	Name = "BgImage", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1),
 	ScaleType = Enum.ScaleType.Crop, ZIndex = 1, Visible = false,
 }, Main)
-local BgDim = New("Frame", {
+BgDim = New("Frame", {
 	Name = "BgDim", Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(0, 0, 0),
 	BorderSizePixel = 0, ZIndex = 2, Visible = false,
 }, Main)
-local BgState = { Found = false }
-
-local function UpdateBackground()
-	local show = Theme.UseImage and BgState.Found
-	BgImage.Visible = show and true or false
-	BgDim.Visible = show and true or false
-	BgDim.BackgroundTransparency = 1 - (Config.BgDim / 100)
-end
 
 local function LoadBackground()
 	BgState.Found = false
@@ -357,12 +399,13 @@ local function RandBits()
 end
 
 do
-	local COLS = 30
-	local CW = 640 / COLS
+	local COLS = 36
 	for i = 1, COLS do
+		local xs = (i - 1) / COLS
+		local y = -math.random(0, 420)
 		local l = New("TextLabel", {
-			BackgroundTransparency = 1, Size = UDim2.fromOffset(CW, 252),
-			Position = UDim2.fromOffset((i - 1) * CW, -math.random(0, 420)),
+			BackgroundTransparency = 1, Size = UDim2.new(1 / COLS, 0, 0, 252),
+			Position = UDim2.new(xs, 0, 0, y),
 			Text = RandBits(), TextSize = 14, Font = Enum.Font.Code, LineHeight = 1,
 			TextYAlignment = Enum.TextYAlignment.Top,
 		}, RainLayer)
@@ -371,7 +414,7 @@ do
 			Rotation = 90,
 			Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(1, 0.6) }),
 		}, l)
-		table.insert(Rain.Cols, { l = l, x = (i - 1) * CW, y = -math.random(0, 420), speed = math.random(50, 130) })
+		table.insert(Rain.Cols, { l = l, xs = xs, y = y, speed = math.random(50, 130) })
 	end
 end
 
@@ -379,28 +422,23 @@ Connect(RunService.RenderStepped, function(dt)
 	if not RainLayer.Visible then
 		return
 	end
+	local h = Window.Size.Y.Offset
 	for _, c in ipairs(Rain.Cols) do
 		c.y += c.speed * dt
-		if c.y > 420 then
+		if c.y > h then
 			c.y = -252
 			c.speed = math.random(50, 130)
 			c.l.Text = RandBits()
 		end
-		c.l.Position = UDim2.fromOffset(c.x, c.y)
+		c.l.Position = UDim2.new(c.xs, 0, 0, c.y)
 	end
 end)
 
-local function UpdateRain()
-	RainLayer.Visible = Rain.Enabled and not State.Minimized
-end
-
 --// Top bar
-local TopBar = New("Frame", {
-	Name = "TopBar", Size = UDim2.new(1, 0, 0, 40), BorderSizePixel = 0, BackgroundTransparency = 0.15, ZIndex = 5,
-}, Main)
+local TopBar = New("Frame", { Name = "TopBar", Size = UDim2.new(1, 0, 0, 44), BorderSizePixel = 0, ZIndex = 5 }, Main)
 Bind(TopBar, { BackgroundColor3 = "Surface" })
-Text(TopBar, { Text = "LIMINAL HUB", Size = UDim2.new(0, 160, 1, 0), Position = UDim2.fromOffset(14, 0), TextSize = 14 }, "Accent", true)
-Text(TopBar, { Text = "v" .. VERSION, Size = UDim2.new(0, 60, 1, 0), Position = UDim2.fromOffset(112, 1), TextSize = 10 }, "SubText")
+Panel(TopBar)
+Text(TopBar, { Text = "LIMINAL HUB", Size = UDim2.new(0, 220, 1, 0), Position = UDim2.fromOffset(16, 0), TextSize = 19 }, "Accent", true)
 
 local AccentLine = New("Frame", {
 	Size = UDim2.new(1, 0, 0, 1), Position = UDim2.new(0, 0, 1, -1), BorderSizePixel = 0, BackgroundColor3 = Color3.new(1, 1, 1),
@@ -410,18 +448,19 @@ AddRefresher(function()
 	AccentGrad.Color = ColorSequence.new(Theme.Accent, Theme.Accent2)
 end)
 
-local function TopButton(iconName, xOffset)
+local function TopButton(iconName, xOffset, size, hoverColor)
 	local b = New("ImageButton", {
-		BackgroundTransparency = 1, Image = Icon(iconName), Size = UDim2.fromOffset(16, 16),
+		BackgroundTransparency = 1, Image = Icon(iconName), Size = UDim2.fromOffset(size, size),
 		AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, xOffset, 0.5, 0),
 	}, TopBar)
-	Bind(b, { ImageColor3 = "SubText" })
-	Connect(b.MouseEnter, function() Tween(b, { ImageColor3 = Theme.Accent }, 0.15) end)
-	Connect(b.MouseLeave, function() Tween(b, { ImageColor3 = Theme.SubText }, 0.15) end)
+	Bind(b, { ImageColor3 = "Text" })
+	Connect(b.MouseEnter, function() Tween(b, { ImageColor3 = hoverColor or Theme.Accent }, 0.15) end)
+	Connect(b.MouseLeave, function() Tween(b, { ImageColor3 = Theme.Text }, 0.15) end)
 	return b
 end
-local CloseBtn = TopButton("x", -14)
-local MinBtn = TopButton("minus", -42)
+local CloseBtn = TopButton("x", -14, 24, Color3.fromRGB(255, 85, 85))
+local MaxBtn = TopButton("maximize", -52, 20)
+local MinBtn = TopButton("minus", -86, 20)
 
 --// Smooth (tweened) dragging
 do
@@ -447,65 +486,99 @@ end
 
 --// Body: sidebar + content
 local Body = New("Frame", {
-	Name = "Body", BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 40), Size = UDim2.new(1, 0, 1, -40), ZIndex = 4,
+	Name = "Body", BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 44), Size = UDim2.new(1, 0, 1, -44), ZIndex = 4,
 }, Main)
 
-local Sidebar = New("Frame", { Name = "Sidebar", Size = UDim2.new(0, 150, 1, 0), BackgroundTransparency = 0.2, BorderSizePixel = 0 }, Body)
+local Sidebar = New("Frame", { Name = "Sidebar", Size = UDim2.new(0, 150, 1, 0), BorderSizePixel = 0 }, Body)
 Bind(Sidebar, { BackgroundColor3 = "Surface" })
+Panel(Sidebar)
 local Divider = New("Frame", { Size = UDim2.new(0, 1, 1, 0), Position = UDim2.new(1, -1, 0, 0), BorderSizePixel = 0 }, Sidebar)
 Bind(Divider, { BackgroundColor3 = "Stroke" })
-local SidebarInner = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1) }, Sidebar)
-Pad(SidebarInner, 8)
-local TabList = New("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, -44) }, SidebarInner)
+local TabList = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1) }, Sidebar)
+Pad(TabList, 8)
 List(TabList, 4)
-local Footer = New("Frame", {
-	BackgroundTransparency = 1, AnchorPoint = Vector2.new(0, 1), Position = UDim2.fromScale(0, 1),
-	Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
-}, SidebarInner)
-List(Footer, 4)
 
 local Content = New("Frame", { Name = "Content", BackgroundTransparency = 1, Position = UDim2.fromOffset(150, 0), Size = UDim2.new(1, -150, 1, 0) }, Body)
 
---// Open / close (X button and toggle key hide the UI, they do not unload it)
+--// Open / close animations
+local function PlayOpen()
+	local s = Config.Scale / 100
+	Gui.Enabled = true
+	UIScaleObj.Scale = s * 0.86
+	Anim.Position = UDim2.fromOffset(0, 28)
+	Main.GroupTransparency = 1
+	ShadowBox.BackgroundTransparency = 1
+	if Shadow then
+		Shadow.Transparency = 1
+	end
+	Tween(UIScaleObj, { Scale = s }, 0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+	Tween(Anim, { Position = UDim2.new() }, 0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+	Tween(Main, { GroupTransparency = 0 }, 0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	Tween(ShadowBox, { BackgroundTransparency = 0 }, 0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	if Shadow then
+		Tween(Shadow, { Transparency = SHADOW_T }, 0.6)
+	end
+end
+
+local function PlayClose()
+	local s = Config.Scale / 100
+	Tween(UIScaleObj, { Scale = s * 0.9 }, 0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.In)
+	Tween(Anim, { Position = UDim2.fromOffset(0, 30) }, 0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.In)
+	Tween(Main, { GroupTransparency = 1 }, 0.28, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+	Tween(ShadowBox, { BackgroundTransparency = 1 }, 0.28, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+	if Shadow then
+		Tween(Shadow, { Transparency = 1 }, 0.25)
+	end
+	return 0.32
+end
+
 local function SetOpen(open)
-	if State.Open == open then
+	if State.Unloading or State.Open == open then
 		return
 	end
 	State.Open = open
-	local s = Config.Scale / 100
+	State.Token += 1
+	local token = State.Token
 	if open then
-		Gui.Enabled = true
-		UIScaleObj.Scale = s * 0.93
-		Tween(UIScaleObj, { Scale = s }, 0.22, Enum.EasingStyle.Quint)
+		PlayOpen()
 	else
-		Tween(UIScaleObj, { Scale = s * 0.93 }, 0.14, Enum.EasingStyle.Quint)
-		task.delay(0.15, function()
-			if not State.Open then
+		local d = PlayClose()
+		task.delay(d, function()
+			if State.Token == token and not State.Open then
 				Gui.Enabled = false
 			end
 		end)
 	end
 end
 
+--// Window buttons
 local Destroy
-Connect(MinBtn.MouseButton1Click, function()
-	State.Minimized = not State.Minimized
-	if State.Minimized then
-		Body.Visible = false
-		Tween(Window, { Size = UDim2.fromOffset(640, 40) }, 0.2)
-	else
-		Tween(Window, { Size = UDim2.fromOffset(640, 420) }, 0.2)
-		task.delay(0.15, function()
-			if not State.Minimized then
-				Body.Visible = true
-			end
-		end)
+local Sound -- forward declared, created in the music engine below
+
+local function Unload()
+	if State.Unloading then
+		return
 	end
-	UpdateRain()
+	State.Unloading = true
+	State.Open = false
+	local d = PlayClose()
+	if Sound then
+		Tween(Sound, { Volume = 0 }, d + 0.15)
+	end
+	task.delay(d + 0.2, function()
+		Destroy()
+	end)
+end
+
+Connect(MinBtn.MouseButton1Click, function()
+	SetOpen(false) -- same as the toggle key
 end)
-Connect(CloseBtn.MouseButton1Click, function()
-	SetOpen(false)
+Connect(MaxBtn.MouseButton1Click, function()
+	State.Maximized = not State.Maximized
+	local sz = State.Maximized and SIZE_MAX or SIZE_NORMAL
+	Tween(Window, { Size = UDim2.fromOffset(sz.X, sz.Y) }, 0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 end)
+Connect(CloseBtn.MouseButton1Click, Unload)
 
 --// Tabs
 local Tabs, CurrentTab = {}, nil
@@ -520,25 +593,27 @@ local function SelectTab(tab)
 	RefreshAll()
 end
 
-local function CreateTab(name, iconName, bottom)
+local function CreateTab(name, iconName)
 	local tab = setmetatable({ Name = name, _order = 0 }, Tab)
 
 	local btn = New("TextButton", {
-		Name = name, Size = UDim2.new(1, 0, 0, 34), BackgroundTransparency = 1, Text = "",
+		Name = name, Size = UDim2.new(1, 0, 0, 36), BackgroundTransparency = 1, Text = "",
 		AutoButtonColor = false, LayoutOrder = #Tabs + 1, BorderSizePixel = 0,
-	}, bottom and Footer or TabList)
+	}, TabList)
+	Corner(btn, 6)
 	local tstroke = New("UIStroke", { Thickness = 1, Transparency = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }, btn)
-	local bar = New("Frame", { Size = UDim2.new(0, 2, 1, 0), BorderSizePixel = 0, BackgroundTransparency = 1 }, btn)
-	local ico = New("ImageLabel", { BackgroundTransparency = 1, Image = Icon(iconName), Size = UDim2.fromOffset(18, 18), Position = UDim2.new(0, 12, 0.5, -9) }, btn)
+	local bar = New("Frame", { Size = UDim2.new(0, 3, 0.6, 0), Position = UDim2.new(0, 0, 0.2, 0), BorderSizePixel = 0, BackgroundTransparency = 1 }, btn)
+	Corner(bar, 2)
+	local ico = New("ImageLabel", { BackgroundTransparency = 1, Image = Icon(iconName), Size = UDim2.fromOffset(18, 18), Position = UDim2.new(0, 14, 0.5, -9) }, btn)
 	local lbl = New("TextLabel", {
-		BackgroundTransparency = 1, Text = name, Size = UDim2.new(1, -42, 1, 0), Position = UDim2.fromOffset(38, 0),
-		TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left,
+		BackgroundTransparency = 1, Text = name, Size = UDim2.new(1, -44, 1, 0), Position = UDim2.fromOffset(40, 0),
+		TextSize = 14, TextXAlignment = Enum.TextXAlignment.Left,
 	}, btn)
 	Bind(lbl, { Font = "FontBold" })
 
 	local page = New("ScrollingFrame", {
 		Name = name, BackgroundTransparency = 1, BorderSizePixel = 0, Size = UDim2.fromScale(1, 1),
-		ScrollBarThickness = 2, CanvasSize = UDim2.new(), AutomaticCanvasSize = Enum.AutomaticSize.Y,
+		ScrollBarThickness = 3, CanvasSize = UDim2.new(), AutomaticCanvasSize = Enum.AutomaticSize.Y,
 		Visible = false,
 	}, Content)
 	Bind(page, { ScrollBarImageColor3 = "Accent" })
@@ -548,11 +623,11 @@ local function CreateTab(name, iconName, bottom)
 
 	AddRefresher(function(instant)
 		local active = CurrentTab == tab
-		Set(btn, { BackgroundTransparency = active and 0.2 or 1, BackgroundColor3 = Theme.Surface2 }, instant)
+		Set(btn, { BackgroundTransparency = active and 0.1 or 1, BackgroundColor3 = Theme.Surface2 }, instant)
 		Set(bar, { BackgroundTransparency = active and 0 or 1, BackgroundColor3 = Theme.Accent }, instant)
-		Set(tstroke, { Transparency = active and 0.6 or 1, Color = Theme.Accent }, instant)
-		Set(ico, { ImageColor3 = active and Theme.Accent or Theme.SubText }, instant)
-		Set(lbl, { TextColor3 = active and Theme.Text or Theme.SubText }, instant)
+		Set(tstroke, { Transparency = active and 0.65 or 1, Color = Theme.Accent }, instant)
+		Set(ico, { ImageColor3 = active and Theme.Accent or Theme.Text }, instant)
+		Set(lbl, { TextColor3 = active and Theme.Accent or Theme.Text }, instant)
 	end)
 
 	Connect(btn.MouseButton1Click, function()
@@ -570,11 +645,13 @@ end
 function Tab:Section(title, iconName)
 	self._order += 1
 	local frame = New("Frame", {
-		Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, BackgroundTransparency = 0.2,
+		Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
 		BorderSizePixel = 0, LayoutOrder = self._order,
 	}, self.Page)
 	Bind(frame, { BackgroundColor3 = "Surface" })
-	Stroke(frame, "Accent", 0.72) -- soft glow stroke
+	Panel(frame)
+	Corner(frame, 6)
+	Stroke(frame, "Stroke", 0.2)
 	Pad(frame, 10)
 	List(frame, 8)
 
@@ -610,6 +687,7 @@ function Tab:Section(title, iconName)
 			Size = UDim2.fromScale(1, 1), Text = str, TextSize = 13, AutoButtonColor = false, BorderSizePixel = 0,
 		}, row)
 		Bind(b, { BackgroundColor3 = "Surface2", TextColor3 = "Text", Font = "FontBold" })
+		Corner(b, 5)
 		local s = Stroke(b, "Stroke")
 		Connect(b.MouseEnter, function() Tween(s, { Color = Theme.Accent }, 0.15) end)
 		Connect(b.MouseLeave, function() Tween(s, { Color = Theme.Stroke }, 0.15) end)
@@ -625,17 +703,19 @@ function Tab:Section(title, iconName)
 		local row = Row(self, 28)
 		Text(row, { Text = str, Size = UDim2.new(1, -50, 1, 0) }, "Text")
 		local sw = New("TextButton", {
-			AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, 0, 0.5, 0), Size = UDim2.fromOffset(38, 18),
+			AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, 0, 0.5, 0), Size = UDim2.fromOffset(38, 20),
 			Text = "", AutoButtonColor = false, BorderSizePixel = 0,
 		}, row)
+		Corner(sw, 10)
 		local swStroke = New("UIStroke", { Thickness = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }, sw)
-		local knob = New("Frame", { Size = UDim2.fromOffset(12, 12), BorderSizePixel = 0 }, sw)
+		local knob = New("Frame", { Size = UDim2.fromOffset(14, 14), BorderSizePixel = 0 }, sw)
+		Corner(knob, 7)
 		local state = default and true or false
 		AddRefresher(function(instant)
 			Set(sw, { BackgroundColor3 = state and Theme.Accent or Theme.Surface2 }, instant)
 			Set(swStroke, { Color = state and Theme.Accent or Theme.Stroke }, instant)
 			Set(knob, {
-				Position = state and UDim2.new(1, -15, 0.5, -6) or UDim2.new(0, 3, 0.5, -6),
+				Position = state and UDim2.new(1, -17, 0.5, -7) or UDim2.new(0, 3, 0.5, -7),
 				BackgroundColor3 = state and Theme.OnAccent or Theme.SubText,
 			}, instant)
 		end)
@@ -662,11 +742,14 @@ function Tab:Section(title, iconName)
 		local hit = New("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 22), Size = UDim2.new(1, 0, 0, 16) }, row)
 		local track = New("Frame", { Position = UDim2.new(0, 0, 0.5, -2), Size = UDim2.new(1, 0, 0, 4), BorderSizePixel = 0 }, hit)
 		Bind(track, { BackgroundColor3 = "Surface2" })
+		Corner(track, 2)
 		Stroke(track, "Stroke", 0.4)
 		local fill = New("Frame", { Size = UDim2.fromScale(0, 1), BorderSizePixel = 0 }, track)
 		Bind(fill, { BackgroundColor3 = "Accent" })
-		local knob = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0, 0.5), Size = UDim2.fromOffset(6, 14), BorderSizePixel = 0 }, track)
+		Corner(fill, 2)
+		local knob = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0, 0.5), Size = UDim2.fromOffset(8, 14), BorderSizePixel = 0 }, track)
 		Bind(knob, { BackgroundColor3 = "Text" })
+		Corner(knob, 3)
 		Stroke(knob, "Accent", 0.4)
 
 		local value = math.clamp(default, min, max)
@@ -718,6 +801,7 @@ function Tab:Section(title, iconName)
 			Text = default, TextSize = 12, AutoButtonColor = false, BorderSizePixel = 0,
 		}, row)
 		Bind(b, { BackgroundColor3 = "Surface2", TextColor3 = "Accent", Font = "FontBold" })
+		Corner(b, 5)
 		Stroke(b, "Stroke")
 		Connect(b.MouseButton1Click, function()
 			if State.Listening then
@@ -750,8 +834,8 @@ function Tab:Section(title, iconName)
 end
 
 --// Music engine
-local Sound = New("Sound", { Name = "LiminalHub_Music", Looped = true, Volume = 0.5 }, SoundService)
-local Music = { Playing = false, Ready = false }
+Sound = New("Sound", { Name = "LiminalHub_Music", Looped = true, Volume = 0.5 }, SoundService)
+local Music = { Playing = false, Ready = false, Downloading = false }
 
 local function ApplyVolume()
 	Sound.Volume = Config.Muted and 0 or (Config.Volume / 100)
@@ -785,11 +869,33 @@ function Music.SetPlaying(play)
 	end
 end
 
-Music.Load()
+-- Default track: downloaded from the repo's MusicPlayer folder only if you don't already have a Music.mp3
+function Music.DownloadDefault()
+	if Music.Downloading or isfile(PATHS.Track) then
+		return
+	end
+	Music.Downloading = true
+	task.spawn(function()
+		local ok, data = pcall(game.HttpGet, game, RAW .. "MusicPlayer/Music.mp3")
+		if ok and type(data) == "string" and #data > 2048 and data:sub(1, 3) ~= "404" then
+			pcall(writefile, PATHS.Track, data)
+		else
+			warn("[Liminal Hub] Could not download the default Music.mp3")
+		end
+		Music.Downloading = false
+		if Gui.Parent and Music.Load() and Config.Autoplay then
+			Music.SetPlaying(true)
+		end
+	end)
+end
 
---// Pages
+if not Music.Load() then
+	Music.DownloadDefault()
+end
+
+--// Pages (Settings sits right under Home)
 local Home = CreateTab("Home", "house")
-local Settings = CreateTab("Settings", "settings", true)
+local Settings = CreateTab("Settings", "settings")
 
 -- Home
 do
@@ -802,7 +908,7 @@ do
 			exec = tostring(name) .. (ver and (" " .. tostring(ver)) or "")
 		end
 	end
-	welcome:Label("Executor: " .. exec .. "\nPlace ID: " .. game.PlaceId .. "\nPress " .. Config.ToggleKey .. " to show or hide the UI.")
+	welcome:Label("Executor: " .. exec .. "\nPlace ID: " .. game.PlaceId .. "\nPress " .. Config.ToggleKey .. " (or the minus button) to hide the UI, and again to bring it back.")
 
 	local quick = Home:Section("Quick Actions", "sliders-horizontal")
 	quick:Button("Open Settings", function()
@@ -829,9 +935,7 @@ do
 		Config.Autoplay = v
 		Save()
 	end)
-	general:Button("Unload Liminal Hub", function()
-		Destroy()
-	end)
+	general:Button("Unload Liminal Hub", Unload)
 end
 
 -- Settings > Themes
@@ -857,8 +961,8 @@ local function ApplyTheme(name, instant)
 		end
 	end
 	Rain.Enabled = (name == "Matrix")
-	UpdateRain()
-	UpdateBackground()
+	RainLayer.Visible = Rain.Enabled
+	UpdateBackground(instant)
 	RefreshAll(instant)
 end
 
@@ -874,13 +978,15 @@ do
 		local card = New("TextButton", {
 			LayoutOrder = i, Text = "", AutoButtonColor = false, BackgroundColor3 = t.Background, BorderSizePixel = 0,
 		}, grid)
+		Corner(card, 6)
 		local stroke = New("UIStroke", { Thickness = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Color = t.Stroke }, card)
 		New("TextLabel", {
 			BackgroundTransparency = 1, Text = string.upper(name), Font = t.FontBold, TextSize = 11, TextColor3 = t.Text,
 			TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(10, 8), Size = UDim2.new(1, -20, 0, 16),
 		}, card)
 		for s, col in ipairs({ t.Accent, t.Accent2, t.Surface2 }) do
-			New("Frame", { Size = UDim2.fromOffset(14, 6), Position = UDim2.new(0, 10 + (s - 1) * 20, 1, -18), BackgroundColor3 = col, BorderSizePixel = 0 }, card)
+			local sw = New("Frame", { Size = UDim2.fromOffset(14, 6), Position = UDim2.new(0, 10 + (s - 1) * 20, 1, -18), BackgroundColor3 = col, BorderSizePixel = 0 }, card)
+			Corner(sw, 2)
 		end
 		ThemeCards[name] = stroke
 		Connect(card.MouseButton1Click, function()
@@ -896,13 +1002,14 @@ do
 		end
 	end)
 
-	themes:Label("Watch Dogs supports a custom background. Put Background.png (or .jpg) in Workspace/LiminalHub/ and press reload.")
-	themes:Slider("Background Dim", 0, 95, Config.BgDim, function(v)
+	BgStatus = themes:Label("")
+	themes:Slider("Background Darkness", 0, 95, Config.BgDim, function(v)
 		Config.BgDim = v
 		UpdateBackground()
 		Save()
 	end, "%")
 	themes:Button("Reload Background", LoadBackground)
+	UpdateBackground(true)
 end
 
 -- Settings > Music Player
@@ -916,9 +1023,11 @@ do
 	local barHit = New("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 42), Size = UDim2.new(1, 0, 0, 14) }, pc)
 	local track = New("Frame", { Position = UDim2.new(0, 0, 0.5, -2), Size = UDim2.new(1, 0, 0, 4), BorderSizePixel = 0 }, barHit)
 	Bind(track, { BackgroundColor3 = "Surface2" })
+	Corner(track, 2)
 	Stroke(track, "Stroke", 0.4)
 	local fill = New("Frame", { Size = UDim2.fromScale(0, 1), BorderSizePixel = 0 }, track)
 	Bind(fill, { BackgroundColor3 = "Accent" })
+	Corner(fill, 2)
 
 	local tCur = Text(pc, { Text = "0:00", Size = UDim2.new(1, 0, 0, 14), Position = UDim2.fromOffset(0, 58), TextSize = 11 }, "SubText")
 	local tEnd = Text(pc, { Text = "0:00", Size = UDim2.new(1, 0, 0, 14), Position = UDim2.fromOffset(0, 58), TextSize = 11, TextXAlignment = Enum.TextXAlignment.Right }, "SubText")
@@ -935,7 +1044,7 @@ do
 	-- Play / pause
 	local playBtn = New("TextButton", { Position = UDim2.fromOffset(0, 76), Size = UDim2.fromOffset(28, 28), Text = "", AutoButtonColor = false, BorderSizePixel = 0 }, pc)
 	Bind(playBtn, { BackgroundColor3 = "Accent" })
-	Stroke(playBtn, "Accent", 0.4)
+	Corner(playBtn, 6)
 	local playIcon = New("ImageLabel", { BackgroundTransparency = 1, Size = UDim2.fromOffset(14, 14), Position = UDim2.fromOffset(7, 7) }, playBtn)
 	Bind(playIcon, { ImageColor3 = "OnAccent" })
 
@@ -984,8 +1093,12 @@ do
 		local was = Music.Playing
 		Sound:Stop()
 		Music.Playing = false
-		if Music.Load() and was then
-			Music.SetPlaying(true)
+		if Music.Load() then
+			if was then
+				Music.SetPlaying(true)
+			end
+		else
+			Music.DownloadDefault()
 		end
 		RenderControls(true)
 	end)
@@ -998,7 +1111,7 @@ do
 		end
 		acc = 0
 		if not isfile(PATHS.Track) then
-			status.Text = "Put a file at Workspace/" .. PATHS.Track
+			status.Text = Music.Downloading and "Downloading default track..." or ("Put a file at Workspace/" .. PATHS.Track)
 			Music.Ready = false
 			fill.Size = UDim2.fromScale(0, 1)
 			return
@@ -1059,6 +1172,8 @@ getgenv().LiminalHub = { Destroy = Destroy, Version = VERSION }
 --// Start
 ApplyTheme(Config.Theme, true)
 SelectTab(Home)
+State.Open = true
+PlayOpen()
 if Config.Autoplay then
 	Music.SetPlaying(true)
 	RefreshAll(true)
