@@ -936,7 +936,7 @@ end
 
 -- Script Hub
 do
-	local Scriptz = Home:Section("My Scripts", "scroll")
+	local Scriptz = ScriptHub:Section("My Scripts", "scroll")
 	Scriptz:Button("Load SundownV5", function()
 		loadstring(game:HttpGet("https://raw.githubusercontent.com/YetYoursTruly/Sundown-UI/main/SundownV5"))()
 	end)
