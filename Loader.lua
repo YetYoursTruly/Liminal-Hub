@@ -58,6 +58,7 @@ local BG_FILES = { "Background.png", "Background.jpg", "Background.jpeg" }
 local ICONS = {
 	"settings", "palette", "music", "play", "pause", "repeat", "volume-2",
 	"volume-x", "sliders-horizontal", "house", "x", "minus", "maximize", "info",
+	"scroll",
 }
 local SIZE_NORMAL = Vector2.new(640, 420)
 local SIZE_MAX = Vector2.new(880, 560)
@@ -896,7 +897,7 @@ end
 
 --// Pages (Settings sits right under Home)
 local Home = CreateTab("Home", "house")
-local ScriptHub = CreateTab("Home", "scroll")
+local ScriptHub = CreateTab("Script Hub", "scroll")
 local Settings = CreateTab("Settings", "settings")
 
 -- Home
