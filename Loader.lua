@@ -919,6 +919,19 @@ do
 	end)
 end
 
+local queue_on_teleport =
+    queue_on_teleport
+    or (syn and syn.queue_on_teleport)
+    or (fluxus and fluxus.queue_on_teleport)
+
+if queue_on_teleport then
+    queue_on_teleport([[
+        loadstring(game:HttpGet(
+            "https://raw.githubusercontent.com/YetYoursTruly/Liminal-Hub/main/Loader.lua"
+        ))()
+    ]])
+end
+
 -- Settings > General
 do
 	local general = Settings:Section("General", "sliders-horizontal")
