@@ -263,6 +263,7 @@ end
 local function Img(parent, name, size, pos, color)
 	local i = New("ImageLabel", {
 		BackgroundTransparency = 1, Image = Icon(name),
+		ResampleMode = Enum.ResamplerMode.Pixelated,
 		Size = UDim2.fromOffset(size, size), Position = pos or UDim2.new(),
 	}, parent)
 	return Bind(i, { ImageColor3 = color or "Accent" })
