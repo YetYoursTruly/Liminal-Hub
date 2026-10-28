@@ -896,6 +896,7 @@ end
 
 --// Pages (Settings sits right under Home)
 local Home = CreateTab("Home", "house")
+local ScriptHub = CreateTab("Home", "scroll")
 local Settings = CreateTab("Settings", "settings")
 
 -- Home
@@ -931,6 +932,20 @@ if queue_on_teleport then
             "https://raw.githubusercontent.com/YetYoursTruly/Liminal-Hub/main/Loader.lua"
         ))()
     ]])
+end
+
+-- Script Hub
+do
+	local Scriptz = Home:Section("My Scripts", "scroll")
+	Scriptz:Button("Load SundownV5", function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/YetYoursTruly/Sundown-UI/main/SundownV5"))()
+	end)
+
+	Scriptz:Button("Load Syn-Guard", function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/YetYoursTruly/Syn-Guard/main/Loader.lua"))()
+	end)
+
+	Scriptz:Label("More coming soon!")
 end
 
 -- Settings > General
