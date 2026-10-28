@@ -263,7 +263,7 @@ end
 local function Img(parent, name, size, pos, color)
 	local i = New("ImageLabel", {
 		BackgroundTransparency = 1, Image = Icon(name),
-		ResampleMode = Enum.ResamplerMode.Pixelated,
+		ResampleMode = Enum.ResamplerMode.Default,
 		Size = UDim2.fromOffset(size, size), Position = pos or UDim2.new(),
 	}, parent)
 	return Bind(i, { ImageColor3 = color or "Accent" })
@@ -659,10 +659,10 @@ function Tab:Section(title, iconName)
 	local header = New("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 18), LayoutOrder = 0 }, frame)
 	local textX = 0
 	if iconName then
-		Img(header, iconName, 14, UDim2.new(0, 0, 0.5, -7), "Accent")
+		Img(header, iconName, 20, UDim2.new(0, 0, 0.5, -10), "Accent")
 		textX = 22
 	end
-	Text(header, { Text = string.upper(title), Size = UDim2.new(1, -textX, 1, 0), Position = UDim2.fromOffset(textX, 0), TextSize = 12 }, "Accent", true)
+	Text(header, { Text = string.upper(title), Size = UDim2.new(1, -textX, 1, 0), Position = UDim2.fromOffset(textX, 0), TextSize = 11 }, "Accent", true)
 
 	local sec = { Frame = frame, _n = 0 }
 
@@ -1063,7 +1063,7 @@ do
 	Bind(playIcon, { ImageColor3 = "OnAccent" })
 
 	-- Loop indicator (always on)
-	Img(pc, "repeat", 16, UDim2.fromOffset(42, 82), "Accent")
+	Img(pc, "repeat", 20, UDim2.fromOffset(42, 80), "Accent")
 	Text(pc, { Text = "Looping", Size = UDim2.fromOffset(60, 28), Position = UDim2.fromOffset(62, 76), TextSize = 12 }, "SubText")
 
 	-- Mute
